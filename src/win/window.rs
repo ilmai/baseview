@@ -36,6 +36,7 @@ use crate::{
 };
 
 use super::drop_target::DropTarget;
+use super::hook::MessageHook;
 use super::keyboard::KeyboardState;
 
 #[cfg(feature = "opengl")]
@@ -486,8 +487,8 @@ impl WindowState {
         self.window_info.borrow()
     }
 
-    pub(super) fn keyboard_state(&self) -> Ref<KeyboardState> {
-        self.keyboard_state.borrow()
+    pub(super) fn keyboard_state_mut(&self) -> RefMut<KeyboardState> {
+        self.keyboard_state.borrow_mut()
     }
 
     pub(super) fn handler_mut(&self) -> RefMut<Option<Box<dyn WindowHandler>>> {
@@ -729,6 +730,10 @@ impl Window<'_> {
                 None
             };
 
+            if parented {
+                MessageHook::install(Rc::downgrade(&window_state));
+            }
+    
             let drop_target = Rc::new(DropTarget::new(Rc::downgrade(&window_state)));
             *window_state._drop_target.borrow_mut() = Some(drop_target.clone());
 

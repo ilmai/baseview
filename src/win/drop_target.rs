@@ -191,7 +191,7 @@ impl DropTarget {
             return E_UNEXPECTED;
         };
 
-        let modifiers = window_state.keyboard_state().get_modifiers_from_mouse_wparam(grfKeyState as WPARAM);
+        let modifiers = window_state.keyboard_state_mut().get_modifiers_from_mouse_wparam(grfKeyState as WPARAM);
 
         drop_target.parse_coordinates(pt);
         drop_target.parse_drop_data(&*pDataObj);
@@ -218,7 +218,7 @@ impl DropTarget {
             return E_UNEXPECTED;
         };
 
-        let modifiers = window_state.keyboard_state().get_modifiers_from_mouse_wparam(grfKeyState as WPARAM);
+        let modifiers = window_state.keyboard_state_mut().get_modifiers_from_mouse_wparam(grfKeyState as WPARAM);
 
         drop_target.parse_coordinates(pt);
 
@@ -251,7 +251,7 @@ impl DropTarget {
             return E_UNEXPECTED;
         };
 
-        let modifiers = window_state.keyboard_state().get_modifiers_from_mouse_wparam(grfKeyState as WPARAM);
+        let modifiers = window_state.keyboard_state_mut().get_modifiers_from_mouse_wparam(grfKeyState as WPARAM);
 
         drop_target.parse_coordinates(pt);
         drop_target.parse_drop_data(&*pDataObj);
