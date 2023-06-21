@@ -5,9 +5,9 @@ use std::rc::Weak;
 
 use winapi::ctypes::c_int;
 use winapi::shared::minwindef::{WPARAM, LPARAM, LRESULT, UINT};
-use winapi::shared::windef::HHOOK;
+use winapi::shared::windef::{HHOOK, HWND};
 use winapi::um::processthreadsapi::GetCurrentThreadId;
-use winapi::um::winuser::{CallNextHookEx, SetWindowsHookExW, MSG, WH_GETMESSAGE, HC_ACTION, PM_REMOVE};
+use winapi::um::winuser::{CallNextHookEx, SetWindowsHookExW, MSG, WH_GETMESSAGE, HC_ACTION, PM_REMOVE, GetFocus, WM_KEYDOWN};
 
 use crate::Event;
 
@@ -40,15 +40,21 @@ impl MessageHook {
         });
     }
 
-    fn process_message(&mut self, msg: UINT, wparam: WPARAM, lparam: LPARAM) {
+    fn process_message(&mut self, hwnd: HWND, msg: UINT, wparam: WPARAM, lparam: LPARAM) {
         self.window_state.retain_mut(|window_state| {
             let Some(window_state) = window_state.upgrade() else {
                 return false;
             };
-    
+
+            // Only process messages meant for our parent (which is the DAW window capturing our inputs)
+            if hwnd != window_state.parent_hwnd {
+                return true;
+            }
+
             let mut keyboard_state = window_state.keyboard_state_mut();
     
             let opt_event = unsafe { keyboard_state.process_message(window_state.hwnd, msg, wparam, lparam) };
+            println!("{:?}", opt_event);
     
             if let Some(event) = opt_event {
                 let mut window = window_state.create_window();
@@ -76,7 +82,7 @@ unsafe extern "system" fn get_msg_proc(code: c_int, wparam: WPARAM, lparam: LPAR
         MESSAGE_HOOK.with(|h| {
             let mut h = h.borrow_mut();
             let hook = h.as_mut().unwrap();
-            hook.process_message(msg.message, msg.wParam, msg.lParam)
+            hook.process_message(msg.hwnd, msg.message, msg.wParam, msg.lParam)
         });
     }
 

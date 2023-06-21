@@ -456,6 +456,7 @@ pub(super) struct WindowState {
     /// struct associated with this HWND through `unsafe { GetWindowLongPtrW(self.hwnd,
     /// GWLP_USERDATA) } as *const WindowState`.
     pub hwnd: HWND,
+    pub parent_hwnd: HWND,
     window_class: ATOM,
     window_info: RefCell<WindowInfo>,
     _parent_handle: Option<ParentHandle>,
@@ -674,6 +675,7 @@ impl Window<'_> {
 
             let window_state = Rc::new(WindowState {
                 hwnd,
+                parent_hwnd: parent,
                 window_class,
                 window_info: RefCell::new(window_info),
                 _parent_handle: parent_handle,
